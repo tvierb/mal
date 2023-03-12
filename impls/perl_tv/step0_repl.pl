@@ -1,5 +1,9 @@
+#!/usr/bin/perl
+
 use strict;
 use warnings;
+use Term::ReadLine; # https://perldoc.perl.org/Term::ReadLine
+
 
 
 # read
@@ -26,9 +30,11 @@ sub REP {
     return PRINT(EVAL(READ($str), {}));
 }
 
-while (1) {
-    print "user> ";
-    my $line = <STDIN>;
-    if (! defined $line) { last; }
-    print(REP($line), "\n");
+my $term = Term::ReadLine->new('Simple perl mal interpreter');
+my $OUT = $term->OUT || \*STDOUT;
+while (defined( $_ = $term->readline("user> ")) )
+{
+    print $OUT REP($_) . "\n";
+    $term->addhistory($_) if /\S/;
 }
+
