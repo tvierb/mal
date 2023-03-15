@@ -2,6 +2,7 @@ package Mal::Reader;
 
 use strict;
 use warnings;
+$|=1;
 
 sub new
 {
@@ -14,24 +15,16 @@ sub new
 sub peek
 {
 	my $self = shift;
-	my $num_tokens = scalar @{ $self->{tokens} };
-	if ($self->{position} >= $num_tokens)
-	{
-		print "unbalanced";
-		exit 1;
-	}
-	# die("end of input") if $self->{position} >= $num_tokens;
+	# die("end of input: nothing to peek") if $self->{position} >= scalar @{ $self->{tokens} };
 	return $self->{ tokens }->[ $self->{position} ];
 }
 
 sub next
 {
 	my $self = shift;
-	my $t = $self->peek();
-	$self->{position}++;
-	return $t;
+	# die("end of input: cannot increase position") if $self->{position} >= scalar @{ $self->{tokens} };
+	return $self->{ tokens }->[ $self->{position}++ ];
 }
-
 
 package main;
 
@@ -56,8 +49,9 @@ sub tokenize
 	my $tokens = [];
 	while ($s =~ /[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)/g)
 	{
-		push( @$tokens, $1 );
+		push( @$tokens, $1 ) if length($1);
 	}
+	# print Dumper( $tokens);
 	return $tokens;
 }
 
@@ -79,14 +73,19 @@ sub read_list
 	my $t = $r->next(); # Klammer wegtun
 	while(1)
 	{
-		if ($r->peek() eq ")")
+		$t = $r->peek();
+		unless (defined($t))
 		{
-			$r->next(); # Klammer-zu wegtun
+			print "end of input in read_list\n";
+			exit(1);
+		}
+		if ($t eq ")")
+		{
+			$r->next();
 			return $mals;
 		}
-		push( @$mals, read_form( $r )); # richtig so?
+		push( @$mals, read_form( $r ) );
 	}
-	return $mals;
 }
 
 sub read_atom

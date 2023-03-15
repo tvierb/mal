@@ -35,10 +35,17 @@ sub REP {
 }
 
 my $term = Term::ReadLine->new('Simple perl mal interpreter');
-my $OUT = $term->OUT || \*STDOUT;
-while (defined( $_ = $term->readline("user> ")) )
-{
-    print $OUT REP($_) . "\n";
-    $term->addhistory($_) if /\S/;
-}
+#my $OUT = $term->OUT || \*STDOUT;
+#while (defined( $_ = $term->readline("user> ")) )
+#{
+	#    print $OUT REP($_) . "\n";
+	 #    $term->addhistory($_) if /\S/;
+#}
 
+while (1)
+{
+	print("user> ");
+	$_ = <STDIN>;
+	exit(0) unless defined($_);
+    print STDOUT REP($_) . "\n";
+}
